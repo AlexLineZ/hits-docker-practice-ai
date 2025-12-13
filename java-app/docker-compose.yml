@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16
+    container_name: shop-db
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: shopAPI
+    ports:
+      - "5432:5432"
+    volumes:
+      - shop_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shop-api
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # можно не задавать, т.к. у тебя уже прописано в application.properties,
+      # но лучше переопределять через env для гибкости:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/shop
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: shopAPI
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  shop_pgdata:
