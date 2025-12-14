@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: shopAPI
     ports:
-      - "5432:5432"
+      - "5429:5432"
     volumes:
       - shop_pgdata:/var/lib/postgresql/data
     healthcheck:
