@@ -1,3 +1,0 @@
-# C# Application (Mockups)
-
-TBD
