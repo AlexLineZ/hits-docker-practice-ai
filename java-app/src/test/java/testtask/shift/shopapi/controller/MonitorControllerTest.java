@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import testtask.shift.shopapi.mapper.MonitorMapper;
 import testtask.shift.shopapi.model.monitor.Monitor;
 import testtask.shift.shopapi.service.MonitorService;
 
@@ -25,6 +26,9 @@ class MonitorControllerTest {
 
     @MockBean
     private MonitorService monitorService;
+
+    @MockBean
+    private MonitorMapper monitorMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

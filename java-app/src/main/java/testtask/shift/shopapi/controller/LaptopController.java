@@ -1,64 +1,60 @@
 package testtask.shift.shopapi.controller;
 
-import com.sun.istack.NotNull;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import testtask.shift.shopapi.dto.LaptopRequest;
+import testtask.shift.shopapi.dto.LaptopResponse;
+import testtask.shift.shopapi.mapper.LaptopMapper;
 import testtask.shift.shopapi.model.laptop.Laptop;
 import testtask.shift.shopapi.service.LaptopService;
 
+import javax.validation.Valid;
+
 @RestController
+@Validated
 @RequestMapping("/api/laptops")
 public class LaptopController {
     private final LaptopService laptopService;
+    private final LaptopMapper laptopMapper;
 
-    public LaptopController(LaptopService laptopService) {
+    public LaptopController(LaptopService laptopService, LaptopMapper laptopMapper) {
         this.laptopService = laptopService;
+        this.laptopMapper = laptopMapper;
     }
 
     @Operation(summary = "Get laptops list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Laptops list",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Laptop.class))))})
     @GetMapping(value = {"", "/"}, produces = "application/json")
-    public @NotNull
-    Iterable<Laptop> getLaptops() {
+    public Iterable<Laptop> getLaptops() {
         return laptopService.getAllLaptops();
     }
 
     @Operation(summary = "Get laptop by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Laptop by this ID was found",
-                    content = @Content(schema = @Schema(implementation = Laptop.class))),
-            @ApiResponse(responseCode = "404", description = "Laptop by this ID was not found",
-                    content = @Content(schema = @Schema(implementation = Laptop.class)))})
     @GetMapping(value = "/{id}", produces = "application/json")
     public Laptop getLaptop(@PathVariable long id) {
         return laptopService.getLaptop(id);
     }
 
+    // Основной REST endpoint: POST /api/laptops
     @Operation(summary = "Create new laptop")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "New laptop was created",
-                    content = @Content(schema = @Schema(implementation = Laptop.class)))})
-    @PostMapping(value = "/add", produces = "application/json")
-    public Laptop createNewHLaptop(@RequestBody Laptop newLaptop) {
-        return laptopService.save(newLaptop);
+    @PostMapping(value = {"", "/", "/add"}, produces = "application/json")
+    public LaptopResponse createLaptop(@Valid @RequestBody LaptopRequest request) {
+        Laptop entity = laptopMapper.toEntity(request);
+        Laptop saved = laptopService.save(entity);
+        return laptopMapper.toResponse(saved);
     }
 
     @Operation(summary = "Edit existing laptop")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Laptop was edited",
-                    content = @Content(schema = @Schema(implementation = Laptop.class)))})
     @PutMapping(value = "/{id}", produces = "application/json")
-    public Laptop editLaptop(@PathVariable long id,
-                             @RequestBody @org.jetbrains.annotations.NotNull Laptop newLaptop) {
+    public LaptopResponse editLaptop(@PathVariable long id,
+                                     @Valid @RequestBody LaptopRequest request) {
+        // 404 if not found
         laptopService.getLaptop(id);
-        newLaptop.setId(id);
-        return laptopService.save(newLaptop);
+
+        Laptop entity = laptopMapper.toEntity(request);
+        entity.setId(id);
+
+        Laptop saved = laptopService.save(entity);
+        return laptopMapper.toResponse(saved);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import testtask.shift.shopapi.mapper.HardDriveMapper;
 import testtask.shift.shopapi.model.hdd.HardDrive;
 import testtask.shift.shopapi.service.HardDriveService;
 
@@ -25,6 +26,9 @@ class HardDriveControllerTest {
 
     @MockBean
     private HardDriveService hardDriveService;
+
+    @MockBean
+    private HardDriveMapper hardDriveMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

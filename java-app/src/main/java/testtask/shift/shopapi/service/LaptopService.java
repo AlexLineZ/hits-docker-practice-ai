@@ -1,8 +1,9 @@
 package testtask.shift.shopapi.service;
 
-import com.sun.istack.NotNull;
 import org.springframework.validation.annotation.Validated;
 import testtask.shift.shopapi.model.laptop.Laptop;
+
+import javax.validation.constraints.NotNull;
 
 @Validated
 public interface LaptopService {

@@ -1,64 +1,58 @@
 package testtask.shift.shopapi.controller;
 
-import com.sun.istack.NotNull;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import testtask.shift.shopapi.dto.MonitorRequest;
+import testtask.shift.shopapi.dto.MonitorResponse;
+import testtask.shift.shopapi.mapper.MonitorMapper;
 import testtask.shift.shopapi.model.monitor.Monitor;
 import testtask.shift.shopapi.service.MonitorService;
 
+import javax.validation.Valid;
+
 @RestController
+@Validated
 @RequestMapping("/api/monitors")
 public class MonitorController {
     private final MonitorService monitorService;
+    private final MonitorMapper monitorMapper;
 
-    public MonitorController(MonitorService monitorService) {
+    public MonitorController(MonitorService monitorService, MonitorMapper monitorMapper) {
         this.monitorService = monitorService;
+        this.monitorMapper = monitorMapper;
     }
 
     @Operation(summary = "Get monitors list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Monitors list",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Monitor.class))))})
     @GetMapping(value = {"", "/"}, produces = "application/json")
-    public @NotNull
-    Iterable<Monitor> getMonitors() {
+    public Iterable<Monitor> getMonitors() {
         return monitorService.getAllMonitors();
     }
 
     @Operation(summary = "Get monitor by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Monitor by this ID was found",
-                    content = @Content(schema = @Schema(implementation = Monitor.class))),
-            @ApiResponse(responseCode = "404", description = "Monitor by this ID was not found",
-                    content = @Content(schema = @Schema(implementation = Monitor.class)))})
     @GetMapping(value = "/{id}", produces = "application/json")
     public Monitor getMonitor(@PathVariable long id) {
         return monitorService.getMonitor(id);
     }
 
     @Operation(summary = "Create new monitor")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "New monitor was created",
-                    content = @Content(schema = @Schema(implementation = Monitor.class)))})
-    @PostMapping(value = "/add", produces = "application/json")
-    public Monitor createNewMonitor(@RequestBody Monitor newMonitor) {
-        return monitorService.save(newMonitor);
+    @PostMapping(value = {"", "/", "/add"}, produces = "application/json")
+    public MonitorResponse createMonitor(@Valid @RequestBody MonitorRequest request) {
+        Monitor entity = monitorMapper.toEntity(request);
+        Monitor saved = monitorService.save(entity);
+        return monitorMapper.toResponse(saved);
     }
 
     @Operation(summary = "Edit existing monitor")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Monitor was edited",
-                    content = @Content(schema = @Schema(implementation = Monitor.class)))})
     @PutMapping(value = "/{id}", produces = "application/json")
-    public Monitor editMonitor(@PathVariable long id,
-                               @RequestBody @org.jetbrains.annotations.NotNull Monitor newMonitor) {
+    public MonitorResponse editMonitor(@PathVariable long id,
+                                       @Valid @RequestBody MonitorRequest request) {
         monitorService.getMonitor(id);
-        newMonitor.setId(id);
-        return monitorService.save(newMonitor);
+
+        Monitor entity = monitorMapper.toEntity(request);
+        entity.setId(id);
+
+        Monitor saved = monitorService.save(entity);
+        return monitorMapper.toResponse(saved);
     }
 }

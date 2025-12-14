@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import testtask.shift.shopapi.mapper.LaptopMapper;
 import testtask.shift.shopapi.model.laptop.Laptop;
 import testtask.shift.shopapi.model.laptop.LaptopSize;
 import testtask.shift.shopapi.service.LaptopService;
@@ -26,6 +27,9 @@ class LaptopControllerTest {
 
     @MockBean
     private LaptopService laptopService;
+
+    @MockBean
+    private LaptopMapper laptopMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

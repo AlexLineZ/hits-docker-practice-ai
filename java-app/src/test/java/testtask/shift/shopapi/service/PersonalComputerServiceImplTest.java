@@ -49,7 +49,7 @@ class PersonalComputerServiceImplTest {
 
         assertThatThrownBy(() -> pcService.getPersonalComputer(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("PC not found");
+                .hasMessage("PersonalComputer not found");
     }
 
     @Test

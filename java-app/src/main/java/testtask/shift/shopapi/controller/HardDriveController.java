@@ -1,64 +1,58 @@
 package testtask.shift.shopapi.controller;
 
-import com.sun.istack.NotNull;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import testtask.shift.shopapi.dto.HardDriveRequest;
+import testtask.shift.shopapi.dto.HardDriveResponse;
+import testtask.shift.shopapi.mapper.HardDriveMapper;
 import testtask.shift.shopapi.model.hdd.HardDrive;
 import testtask.shift.shopapi.service.HardDriveService;
 
+import javax.validation.Valid;
+
 @RestController
+@Validated
 @RequestMapping("/api/hdds")
 public class HardDriveController {
     private final HardDriveService hardDriveService;
+    private final HardDriveMapper hardDriveMapper;
 
-    public HardDriveController(HardDriveService hardDriveService) {
+    public HardDriveController(HardDriveService hardDriveService, HardDriveMapper hardDriveMapper) {
         this.hardDriveService = hardDriveService;
+        this.hardDriveMapper = hardDriveMapper;
     }
 
     @Operation(summary = "Get HDDs list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "HDDs list",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = HardDrive.class))))})
     @GetMapping(value = {"", "/"}, produces = "application/json")
-    public @NotNull
-    Iterable<HardDrive> getHardDrives() {
+    public Iterable<HardDrive> getHardDrives() {
         return hardDriveService.getAllHardDrives();
     }
 
     @Operation(summary = "Get HDD by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "HDD by this ID was found",
-                    content = @Content(schema = @Schema(implementation = HardDrive.class))),
-            @ApiResponse(responseCode = "404", description = "HDD by this ID was not found",
-                    content = @Content(schema = @Schema(implementation = HardDrive.class)))})
     @GetMapping(value = "/{id}", produces = "application/json")
     public HardDrive getHardDrive(@PathVariable long id) {
         return hardDriveService.getHardDrive(id);
     }
 
     @Operation(summary = "Create new HDD")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "New HDD was created",
-                    content = @Content(schema = @Schema(implementation = HardDrive.class)))})
-    @PostMapping(value = "/add", produces = "application/json")
-    public HardDrive createNewHardDrive(@RequestBody HardDrive newHardDrive) {
-        return hardDriveService.save(newHardDrive);
+    @PostMapping(value = {"", "/", "/add"}, produces = "application/json")
+    public HardDriveResponse createHardDrive(@Valid @RequestBody HardDriveRequest request) {
+        HardDrive entity = hardDriveMapper.toEntity(request);
+        HardDrive saved = hardDriveService.save(entity);
+        return hardDriveMapper.toResponse(saved);
     }
 
     @Operation(summary = "Edit existing HDD")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "HDD was edited",
-                    content = @Content(schema = @Schema(implementation = HardDrive.class)))})
     @PutMapping(value = "/{id}", produces = "application/json")
-    public HardDrive editHardDrive(@PathVariable long id,
-                                   @RequestBody @org.jetbrains.annotations.NotNull HardDrive newHardDrive) {
+    public HardDriveResponse editHardDrive(@PathVariable long id,
+                                           @Valid @RequestBody HardDriveRequest request) {
         hardDriveService.getHardDrive(id);
-        newHardDrive.setId(id);
-        return hardDriveService.save(newHardDrive);
+
+        HardDrive entity = hardDriveMapper.toEntity(request);
+        entity.setId(id);
+
+        HardDrive saved = hardDriveService.save(entity);
+        return hardDriveMapper.toResponse(saved);
     }
 }
